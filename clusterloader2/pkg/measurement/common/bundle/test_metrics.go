@@ -131,77 +131,67 @@ func (t *testMetrics) Execute(config *measurement.MeasurementConfig) ([]measurem
 	switch action {
 	case "start":
 		summary, err := execute(t.etcdMetrics, actionStartConfig)
-		klog.Infof("gather etcdMetrics %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.schedulingMetrics, actionResetConfig)
-		klog.Infof("gather schedulingMetrics %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.resourceUsageSummary, actionStartConfig)
-		klog.Infof("gather resourceUsageSummary %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.apiserverCPUProfile, kubeApiserverStartConfig)
-		klog.Infof("gather apiserverCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.apiserverMemoryProfile, kubeApiserverStartConfig)
-		klog.Infof("gather apiserverMemoryProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.schedulerCPUProfile, kubeSchedulerStartConfig)
-		klog.Infof("gather schedulerCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.schedulerMemoryProfile, kubeSchedulerStartConfig)
-		klog.Infof("gather schedulerMemoryProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.controllerManagerCPUProfile, kubeControllerManagerStartConfig)
-		klog.Infof("gather controllerManagerCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 		summary, err = execute(t.controllerManagerMemoryProfile, kubeControllerManagerStartConfig)
-		klog.Infof("gather controllerManagerMemoryProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
 
-		klog.Infof("start summary and error set to %v %v", summary, err)
+		klog.Infof("Start metrics collection with summary: %v and error: %v", summary, err)
 	case "gather":
 		summary, err := execute(t.etcdMetrics, actionGatherConfig)
-		klog.Infof("gather etcd %v: %v", summary, err)
-		appendResults(&summaries, errList, summary, err)
+		if err != nil {
+			klog.Errorf("error while gathering the metrics from etcd %v: %v", summary, err)
+			// FIXME: etcd fails with this error "text format parsing error in line 1: invalid metric name"
+			appendResults(&summaries, errList, summary, nil)
+		} else {
+			appendResults(&summaries, errList, summary, nil)
+		}
+
 		summary, err = execute(t.schedulingMetrics, actionGatherConfig)
 		klog.Infof("gather metricsForE2E %v: %v", summary, err)
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.metricsForE2E, config)
 		klog.Infof("gather metricsForE2E %v: %v", summary, err)
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.resourceUsageSummary, actionGatherConfig)
 		klog.Infof("gather resourceUsageSummary %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.apiserverCPUProfile, kubeApiserverGatherConfig)
 		klog.Infof("gather apiserverCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.apiserverMemoryProfile, kubeApiserverGatherConfig)
 		klog.Infof("gather apiserverMemoryProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.schedulerCPUProfile, kubeSchedulerGatherConfig)
 		klog.Infof("gather schedulerCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.schedulerMemoryProfile, kubeSchedulerGatherConfig)
 		klog.Infof("gather schedulerMemoryProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.controllerManagerCPUProfile, kubeControllerManagerGatherConfig)
 		klog.Infof("gather controllerManagerCPUProfile %v: %v", summary, err)
-
 		appendResults(&summaries, errList, summary, err)
+
 		summary, err = execute(t.controllerManagerMemoryProfile, kubeControllerManagerGatherConfig)
 		appendResults(&summaries, errList, summary, err)
 
